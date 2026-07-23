@@ -1,0 +1,52 @@
+{
+  "name": "bjork-bestillingsapp",
+  "version": "1.0.0",
+  "description": "Produksjonsklar bestillingsapp med Express, EJS, Prisma og PostgreSQL.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:seed": "node prisma/seed.js",
+    "db:seed:test": "cross-env SEED_TEST_DATA=true node prisma/seed.js",
+    "test": "cross-env NODE_ENV=test node --test",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "keywords": [
+    "express",
+    "ejs",
+    "postgresql",
+    "prisma",
+    "railway"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.12.0",
+    "@quixo3/prisma-session-store": "^3.1.6",
+    "bcrypt": "^5.1.1",
+    "connect-flash": "^0.1.1",
+    "csurf": "^1.11.0",
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.1.0",
+    "method-override": "^3.0.0",
+    "morgan": "^1.10.0",
+    "nanoid": "^5.1.5",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.12.0",
+    "supertest": "^7.1.1"
+  }
+}

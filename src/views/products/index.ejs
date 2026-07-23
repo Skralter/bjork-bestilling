@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Produkter</h1>
+  <p>Velg antall per produkt og lagre når du er fornøyd. Antall `0` fjerner bestillingen din.</p>
+  <p class="muted">Alle priser er oppgitt per stk. Hvis det står for eksempel `4-pack`, betyr det bare at ølet må bestilles i 4 stk samlet for at det kan sendes.</p>
+</section>
+
+<section class="card" style="margin-bottom: 1.25rem;">
+  <form class="toolbar" method="get" action="/products">
+    <div class="inline-form">
+      <label style="min-width: 220px;">
+        Bryggeri
+        <select name="brewery">
+          <option value="">Alle bryggerier</option>
+          <% breweries.forEach(function(breweryName) { %>
+            <option value="<%= breweryName %>" <%= filters.brewery === breweryName ? 'selected' : '' %>><%= breweryName %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label style="min-width: 220px;">
+        Sortering
+        <select name="sort">
+          <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Nyeste først</option>
+          <option value="alphabetical" <%= filters.sort === 'alphabetical' ? 'selected' : '' %>>Alfabetisk</option>
+        </select>
+      </label>
+    </div>
+    <div class="button-row">
+      <button class="btn-secondary" type="submit">Filtrer</button>
+      <a class="btn-soft" href="/products">Nullstill</a>
+    </div>
+  </form>
+</section>
+
+<% if (!products.length) { %>
+  <section class="empty-state">
+    <h2>Ingen aktive produkter</h2>
+    <p>Det finnes ingen produkter å bestille akkurat nå.</p>
+  </section>
+<% } else { %>
+  <section class="grid products-grid">
+    <% products.forEach(function(product) { %>
+      <article class="card" id="product-<%= product.id %>" data-product-card>
+        <img class="product-image" src="<%= product.imageUrl || '/images/product-placeholder.svg' %>" alt="Bilde av <%= product.name %>">
+        <h2><%= product.name %></h2>
+        <% if (product.breweryName) { %><p class="muted"><strong><%= product.breweryName %></strong></p><% } %>
+        <p class="muted"><%= product.description %></p>
+        <div class="product-meta">
+          <span class="badge badge-active"><%= product.status %></span>
+          <% if (product.price) { %><span><%= formatCurrency(product.price) %> pr stk</span><% } %>
+        </div>
+        <div class="stack muted">
+          <% if (product.orderDeadline) { %><span>Bestillingsfrist: <%= formatDate(product.orderDeadline) %></span><% } %>
+          <% if (product.remainingStock !== null) { %><span>Tilgjengelig: <%= product.remainingStock %></span><% } %>
+          <% if (product.orderStep > 1) { %><span>Bestilles i trinn på <%= product.orderStep %></span><% } %>
+          <span>Bestilt totalt av alle: <strong data-total-ordered><%= product.totalReserved %></strong></span>
+          <span>Ditt antall nå: <strong data-current-quantity><%= product.userQuantity %></strong></span>
+          <% if (product.imageAttribution) { %><span><%= product.imageAttribution %></span><% } %>
+        </div>
+        <form class="quantity-form" method="post" action="/products/<%= product.id %>/order" data-async-order-form>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <div class="quantity-controls" data-quantity-widget>
+            <button class="btn-soft" type="button" aria-label="Trekk fra <%= product.orderStep %>" data-action="minus" data-step="<%= product.orderStep %>" <%= !product.availability.canOrder ? 'disabled' : '' %>>-</button>
+            <input
+              type="number"
+              name="quantity"
+              value="<%= product.userQuantity %>"
+              min="0"
+              step="<%= product.orderStep %>"
+              aria-label="Antall for <%= product.name %>"
+              <%= !product.availability.canOrder ? 'disabled' : '' %>
+            >
+            <button class="btn-soft" type="button" aria-label="Legg til <%= product.orderStep %>" data-action="plus" data-step="<%= product.orderStep %>" <%= !product.availability.canOrder ? 'disabled' : '' %>>+</button>
+          </div>
+          <% if (product.availability.canOrder) { %>
+            <button class="btn" type="submit">Lagre bestilling</button>
+          <% } else { %>
+            <button class="btn" type="submit" disabled>Lagre bestilling</button>
+            <p class="muted"><%= product.availability.reason %></p>
+          <% } %>
+          <p class="inline-feedback" data-order-feedback aria-live="polite"></p>
+        </form>
+      </article>
+    <% }) %>
+  </section>
+<% } %>
+<%- include('../partials/footer') %>

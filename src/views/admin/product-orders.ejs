@@ -1,0 +1,71 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Bestillingsoversikt for <%= product.name %></h1>
+  <p>Se hvem som har bestilt, hvor mye som er bestilt, og eksporter data til CSV ved behov.</p>
+</section>
+
+<section class="stats-grid">
+  <article><span>Status</span><strong><%= product.status %></strong></article>
+  <article><span>Totalt bestilt</span><strong><%= totalOrdered %></strong></article>
+  <article><span>Antall brukere</span><strong><%= totalUsers %></strong></article>
+  <article><span>Gjenværende beholdning</span><strong><%= remainingStock === null ? 'Ikke satt' : remainingStock %></strong></article>
+  <article><span>Siste bestilling</span><strong><%= lastOrderAt ? formatDate(lastOrderAt) : 'Ingen' %></strong></article>
+</section>
+
+<section class="card">
+  <div class="toolbar">
+    <form class="inline-form" method="get" action="">
+      <input type="text" name="q" value="<%= query %>" placeholder="Søk på navn eller brukernavn" aria-label="Søk i bestillinger">
+      <select name="sort" aria-label="Sorter etter">
+        <option value="updatedAt" <%= sort === 'updatedAt' ? 'selected' : '' %>>Dato</option>
+        <option value="fullName" <%= sort === 'fullName' ? 'selected' : '' %>>Navn</option>
+        <option value="username" <%= sort === 'username' ? 'selected' : '' %>>Brukernavn</option>
+        <option value="quantity" <%= sort === 'quantity' ? 'selected' : '' %>>Antall</option>
+      </select>
+      <select name="direction" aria-label="Sorteringsretning">
+        <option value="desc" <%= direction === 'desc' ? 'selected' : '' %>>Synkende</option>
+        <option value="asc" <%= direction === 'asc' ? 'selected' : '' %>>Stigende</option>
+      </select>
+      <button class="btn-secondary" type="submit">Oppdater</button>
+    </form>
+    <div class="button-row">
+      <a class="btn-soft" href="/admin/products/<%= product.id %>/orders/export">Eksporter CSV</a>
+      <button class="btn-secondary" type="button" onclick="window.print()">Utskriftsvennlig visning</button>
+    </div>
+  </div>
+
+  <% if (!orders.length) { %>
+    <div class="empty-state">
+      <h2>Ingen bestillinger ennå</h2>
+      <p>Ingen brukere har bestilt dette produktet foreløpig.</p>
+    </div>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Navn</th>
+            <th>Brukernavn</th>
+            <th>Antall</th>
+            <th>Opprettet</th>
+            <th>Sist endret</th>
+            <th>Totalsum</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.forEach(function(order) { %>
+            <tr>
+              <td><%= order.user.fullName %></td>
+              <td><%= order.user.username %></td>
+              <td><%= order.quantity %></td>
+              <td><%= formatDateTime(order.createdAt) %></td>
+              <td><%= formatDateTime(order.updatedAt) %></td>
+              <td><%= product.price ? formatCurrency(Number(product.price) * order.quantity) : 'Ikke satt' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>

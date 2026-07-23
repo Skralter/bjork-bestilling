@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DISABLED
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+  SOLD_OUT
+  ARCHIVED
+}
+
+model User {
+  id            String      @id @default(cuid())
+  fullName      String
+  username      String      @unique
+  passwordHash  String
+  role          UserRole    @default(USER)
+  status        UserStatus  @default(PENDING)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  lastLoginAt   DateTime?
+  orders        Order[]
+  sessions      Session[]
+
+  @@index([status])
+  @@index([role])
+}
+
+model Product {
+  id                     String        @id @default(cuid())
+  name                   String
+  breweryName            String?
+  description            String
+  imageUrl               String?
+  imageAttribution       String?
+  price                  Decimal?      @db.Decimal(10, 2)
+  status                 ProductStatus @default(ACTIVE)
+  orderDeadline          DateTime?
+  orderStep              Int           @default(1)
+  totalAvailableQuantity Int?
+  sortOrder              Int           @default(0)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  orders                 Order[]
+
+  @@index([status])
+  @@index([sortOrder, createdAt])
+}
+
+model Order {
+  id        String   @id @default(cuid())
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([expiresAt])
+  @@map("sessions")
+}

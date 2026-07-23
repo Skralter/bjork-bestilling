@@ -1,0 +1,65 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Produktadministrasjon</h1>
+  <p>Opprett, masseinnlegg, rediger og styr status på ølene. Produkter med bestillinger kan ikke slettes permanent.</p>
+  <div class="button-row">
+    <a class="btn" href="/admin/products/new">Opprett produkt</a>
+    <a class="btn-secondary" href="/admin/products/bulk">Masseinnlegg liste</a>
+  </div>
+</section>
+
+<% if (!products.length) { %>
+  <section class="empty-state">
+    <h2>Ingen produkter ennå</h2>
+    <p>Opprett det første produktet for å komme i gang.</p>
+  </section>
+<% } else { %>
+  <section class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Navn</th>
+          <th>Status</th>
+          <th>Pris</th>
+          <th>Trinn</th>
+          <th>Bestillinger</th>
+          <th>Handlinger</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% products.forEach(function(product) { %>
+          <tr>
+            <td>
+              <strong><a href="/admin/products/<%= product.id %>/edit"><%= product.name %></a></strong>
+              <div class="muted"><%= product.breweryName || 'Uten bryggeri' %></div>
+            </td>
+            <td><span class="badge badge-<%= product.status.toLowerCase() %>"><%= product.status %></span></td>
+            <td><%= product.price ? formatCurrency(product.price) : 'Ikke satt' %></td>
+            <td><%= product.orderStep %></td>
+            <td><%= product._count.orders %></td>
+            <td>
+              <div class="button-row">
+                <a class="btn-secondary" href="/admin/products/<%= product.id %>/edit">Rediger</a>
+                <a class="btn-soft" href="/admin/products/<%= product.id %>/orders">Bestillinger</a>
+                <form method="post" action="/admin/products/<%= product.id %>/status">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <select name="status" aria-label="Velg status for <%= product.name %>">
+                    <% Object.values(ProductStatus).forEach(function(status) { %>
+                      <option value="<%= status %>" <%= product.status === status ? 'selected' : '' %>><%= status %></option>
+                    <% }) %>
+                  </select>
+                  <button class="btn-secondary" type="submit">Oppdater status</button>
+                </form>
+                <form method="post" action="/admin/products/<%= product.id %>/delete" data-confirm="Er du sikker på at du vil slette dette produktet permanent? Dette sletter også alle bestillinger på produktet.">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button class="btn-danger" type="submit">Slett</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+<% } %>
+<%- include('../partials/footer') %>

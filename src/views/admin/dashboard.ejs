@@ -1,0 +1,71 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Admin-dashboard</h1>
+  <p>Få oversikt over brukere, produkter og bestillinger på ett sted.</p>
+  <div class="button-row">
+    <a class="btn" href="/admin/products/new">Opprett produkt</a>
+    <a class="btn-secondary" href="/admin/users">Godkjenn brukere</a>
+    <a class="btn-secondary" href="/admin/products">Vis produkter</a>
+  </div>
+</section>
+
+<section class="stats-grid">
+  <article><span>Ventende brukere</span><strong><%= pendingUsers %></strong></article>
+  <article><span>Godkjente brukere</span><strong><%= approvedUsers %></strong></article>
+  <article><span>Aktive produkter</span><strong><%= activeProducts %></strong></article>
+  <article><span>Utsolgte produkter</span><strong><%= soldOutProducts %></strong></article>
+  <article><span>Bestillinger totalt</span><strong><%= totalOrders %></strong></article>
+</section>
+
+<section class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+  <article class="card">
+    <h2 class="section-title">Nylige registreringer</h2>
+    <% if (!recentUsers.length) { %>
+      <p class="muted">Ingen registreringer ennå.</p>
+    <% } else { %>
+      <div class="stack">
+        <% recentUsers.forEach(function(user) { %>
+          <div>
+            <strong><%= user.fullName %></strong>
+            <div class="muted"><%= user.username %> · <%= formatDate(user.createdAt) %></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </article>
+
+  <article class="card">
+    <h2 class="section-title">Nylige bestillinger</h2>
+    <% if (!recentOrders.length) { %>
+      <p class="muted">Ingen bestillinger ennå.</p>
+    <% } else { %>
+      <div class="stack">
+        <% recentOrders.forEach(function(order) { %>
+          <div>
+            <strong><%= order.user.fullName %></strong>
+            <div class="muted"><%= order.quantity %> x <%= order.product.name %> · <%= formatDate(order.updatedAt) %></div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </article>
+
+  <article class="card">
+    <h2 class="section-title">Produkter med lav beholdning</h2>
+    <% if (!lowStockProducts.length) { %>
+      <p class="muted">Ingen aktive produkter er i lav beholdning akkurat nå.</p>
+    <% } else { %>
+      <div class="stack">
+        <% lowStockProducts.forEach(function(product) { %>
+          <div>
+            <strong><%= product.name %></strong>
+            <div class="muted">
+              Lager satt til <%= product.totalAvailableQuantity %> · Pris <%= product.price ? formatCurrency(product.price) : 'Ikke satt' %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </article>
+</section>
+<%- include('../partials/footer') %>

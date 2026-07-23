@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Min konto</h1>
+  <p>Her kan du oppdatere navn og passord. Rolle og godkjenningsstatus styres av administrator.</p>
+</section>
+
+<section class="grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+  <article class="card">
+    <h2>Kontoinformasjon</h2>
+    <form class="form-grid" method="post" action="/account/profile">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>
+        Fullt navn
+        <input type="text" name="fullName" required value="<%= currentUser.fullName %>">
+      </label>
+      <label>
+        Brukernavn
+        <input type="text" value="<%= currentUser.username %>" disabled>
+      </label>
+      <label>
+        Rolle
+        <input type="text" value="<%= currentUser.role %>" disabled>
+      </label>
+      <label>
+        Status
+        <input type="text" value="<%= currentUser.status %>" disabled>
+      </label>
+      <button class="btn" type="submit">Lagre navn</button>
+    </form>
+  </article>
+
+  <article class="card">
+    <h2>Bytt passord</h2>
+    <form class="form-grid" method="post" action="/account/password">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>
+        Nåværende passord
+        <input type="password" name="currentPassword" required autocomplete="current-password">
+      </label>
+      <label>
+        Nytt passord
+        <input type="password" name="newPassword" required autocomplete="new-password">
+      </label>
+      <label>
+        Bekreft nytt passord
+        <input type="password" name="confirmNewPassword" required autocomplete="new-password">
+      </label>
+      <button class="btn" type="submit">Oppdater passord</button>
+    </form>
+  </article>
+</section>
+<%- include('../partials/footer') %>

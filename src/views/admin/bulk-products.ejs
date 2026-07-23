@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Masseinnlegg produkter</h1>
+  <p>Legg inn ett øl per linje med semikolon mellom feltene: bryggeri; ølnavn; beskrivelse; pris; lager; bestillingstrinn; bestillingsfrist; status</p>
+</section>
+
+<section class="card">
+  <% if (typeof errors !== 'undefined' && errors.length) { %>
+    <div class="alerts">
+      <% errors.forEach(function(error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <form class="form-grid" method="post" action="/admin/products/bulk">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>
+      Produktliste
+      <textarea name="rows" required placeholder="Brewery X; Hazy IPA; Fruktig og myk; 79; 48; 4; 2026-08-01T18:00; ACTIVE"><%= formData.rows || '' %></textarea>
+    </label>
+    <% if (hasGoogleImageSearchCredentials) { %>
+      <label style="display:flex; gap:0.75rem; align-items:center; font-weight:500;">
+        <input type="checkbox" name="autoFetchImage">
+        Bruk bare Google-bilde ved tydelig treff, ellers bruk plassholder
+      </label>
+    <% } %>
+    <div class="button-row">
+      <button class="btn" type="submit">Legg inn produkter</button>
+      <a class="btn-secondary" href="/admin/products">Tilbake</a>
+    </div>
+  </form>
+
+  <p class="footer-note">Bestillingsfrist kan stå tom. Status kan være ACTIVE, INACTIVE, SOLD_OUT eller ARCHIVED.</p>
+</section>
+<%- include('../partials/footer') %>

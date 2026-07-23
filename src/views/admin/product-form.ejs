@@ -1,0 +1,69 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1><%= product ? 'Rediger produkt' : 'Opprett produkt' %></h1>
+  <p>Alle produkter behandles som øl. Du kan lime inn en egen bildelenke, eller gjøre et strengt Google-bildesøk når Google-nøkler er satt opp.</p>
+</section>
+
+<section class="card">
+  <% if (typeof errors !== 'undefined' && errors.length) { %>
+    <div class="alerts">
+      <% errors.forEach(function(error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% }) %>
+    </div>
+  <% } %>
+  <form class="form-grid" method="post" action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>
+      Bryggeri
+      <input type="text" name="breweryName" value="<%= formData.breweryName || '' %>">
+    </label>
+    <label>
+      Navn
+      <input type="text" name="name" required value="<%= formData.name || '' %>">
+    </label>
+    <label>
+      Beskrivelse
+      <textarea name="description" required><%= formData.description || '' %></textarea>
+    </label>
+    <label>
+      Bildelenke
+      <input type="url" name="imageUrl" value="<%= formData.imageUrl || '' %>">
+    </label>
+    <label>
+      Pris
+      <input type="text" name="price" value="<%= formData.price || '' %>">
+    </label>
+    <label>
+      Status
+      <select name="status">
+        <% Object.values(ProductStatus).forEach(function(status) { %>
+          <option value="<%= status %>" <%= (formData.status || 'ACTIVE') === status ? 'selected' : '' %>><%= status %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>
+      Bestillingsfrist
+      <input type="datetime-local" name="orderDeadline" value="<%= formData.orderDeadline ? new Date(formData.orderDeadline).toISOString().slice(0, 16) : '' %>">
+    </label>
+    <label>
+      Bestillingstrinn
+      <input type="number" name="orderStep" min="1" value="<%= formData.orderStep ?? 1 %>">
+    </label>
+    <label>
+      Totalt tilgjengelig antall
+      <input type="number" name="totalAvailableQuantity" min="0" value="<%= formData.totalAvailableQuantity ?? '' %>">
+    </label>
+    <% if (hasGoogleImageSearchCredentials) { %>
+      <label style="display:flex; gap:0.75rem; align-items:center; font-weight:500;">
+        <input type="checkbox" name="autoFetchImage" <%= formData.autoFetchImage === 'on' ? 'checked' : '' %>>
+        Bruk bare Google-bilde ved tydelig treff på bryggeri og ølnavn, ellers bruk plassholder
+      </label>
+    <% } %>
+    <div class="button-row">
+      <button class="btn" type="submit"><%= product ? 'Lagre endringer' : 'Opprett produkt' %></button>
+      <a class="btn-secondary" href="/admin/products">Avbryt</a>
+    </div>
+  </form>
+</section>
+<%- include('../partials/footer') %>

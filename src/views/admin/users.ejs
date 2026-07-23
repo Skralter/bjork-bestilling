@@ -1,0 +1,59 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Brukeradministrasjon</h1>
+  <p>Godkjenn, avslå, deaktiver og administrer roller. Serversiden håndhever alle tilgangsregler.</p>
+</section>
+
+<section class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Navn</th>
+        <th>Brukernavn</th>
+        <th>Rolle</th>
+        <th>Status</th>
+        <th>Registrert</th>
+        <th>Siste innlogging</th>
+        <th>Bestillinger</th>
+        <th>Handlinger</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(function(user) { %>
+        <tr>
+          <td><strong><%= user.fullName %></strong></td>
+          <td><%= user.username %></td>
+          <td><span class="badge <%= user.role === 'ADMIN' ? 'badge-admin' : 'badge-active' %>"><%= user.role %></span></td>
+          <td>
+            <span class="badge <%= user.status === 'APPROVED' ? 'badge-approved' : user.status === 'PENDING' ? 'badge-pending' : 'badge-danger' %>">
+              <%= user.status %>
+            </span>
+          </td>
+          <td><%= formatDateTime(user.createdAt) %></td>
+          <td><%= user.lastLoginAt ? formatDateTime(user.lastLoginAt) : 'Aldri' %></td>
+          <td><%= user._count.orders %></td>
+          <td>
+            <div class="stack">
+              <form class="inline-form" method="post" action="/admin/users/<%= user.id %>/status">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <select class="admin-select" name="status" aria-label="Velg status for <%= user.username %>">
+                  <option value="APPROVED" <%= user.status === 'APPROVED' ? 'selected' : '' %>>Godkjent</option>
+                  <option value="PENDING" <%= user.status === 'PENDING' ? 'selected' : '' %>>Ventende</option>
+                  <option value="REJECTED" <%= user.status === 'REJECTED' ? 'selected' : '' %>>Avslått</option>
+                  <option value="DISABLED" <%= user.status === 'DISABLED' ? 'selected' : '' %>>Deaktivert</option>
+                </select>
+                <button class="btn-secondary" type="submit">Lagre status</button>
+              </form>
+              <form class="inline-form" method="post" action="/admin/users/<%= user.id %>/role" data-confirm="Er du sikker på at du vil endre rollen til denne brukeren?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="hidden" name="role" value="<%= user.role === 'ADMIN' ? 'USER' : 'ADMIN' %>">
+                <button class="btn-soft" type="submit"><%= user.role === 'ADMIN' ? 'Gjør til vanlig bruker' : 'Gjør til administrator' %></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>
+<%- include('../partials/footer') %>

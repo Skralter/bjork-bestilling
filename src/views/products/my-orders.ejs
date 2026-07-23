@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Mine bestillinger</h1>
+  <p>Her ser du alle bestillingene dine samlet.</p>
+</section>
+
+<% if (!orders.length) { %>
+  <section class="empty-state">
+    <h2>Ingen bestillinger ennå</h2>
+    <p>Du har ikke lagt inn noen bestillinger ennå.</p>
+  </section>
+<% } else { %>
+  <section class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Produkt</th>
+          <th>Antall</th>
+          <th>Pris</th>
+          <th>Sist endret</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(function(order) { %>
+          <tr>
+            <td>
+              <strong><a href="/products#product-<%= order.product.id %>"><%= order.product.name %></a></strong>
+              <div class="muted"><%= order.product.description %></div>
+            </td>
+            <td><%= order.quantity %></td>
+            <td><%= order.product.price ? formatCurrency(Number(order.product.price) * order.quantity) : 'Ikke satt' %></td>
+            <td><%= formatDate(order.updatedAt) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </section>
+<% } %>
+<%- include('../partials/footer') %>

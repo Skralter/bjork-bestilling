@@ -1,0 +1,96 @@
+<%- include('../partials/header') %>
+<section class="hero">
+  <h1>Bestillingsoversikt</h1>
+  <p>Her får du en samlet oversikt over bestillinger per bruker og per produkt.</p>
+</section>
+
+<section class="grid" style="grid-template-columns: 1fr; gap: 1.5rem;">
+  <article class="card">
+    <h2 class="section-title">Vis bestillinger pr bruker</h2>
+    <% if (!ordersByUser.length) { %>
+      <div class="empty-state">
+        <h3>Ingen bestillinger ennå</h3>
+        <p>Det finnes ingen brukerbestillinger å vise akkurat nå.</p>
+      </div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Bruker</th>
+              <th>Antall produkter</th>
+              <th>Antall totalt</th>
+              <th>Totalsum</th>
+              <th>Detaljer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% ordersByUser.forEach(function(user) { %>
+              <tr>
+                <td>
+                  <strong><%= user.fullName %></strong>
+                  <div class="muted"><%= user.username %></div>
+                </td>
+                <td><%= user.orders.length %></td>
+                <td><%= user.totalQuantity %></td>
+                <td><%= formatCurrency(user.totalValue) %></td>
+                <td>
+                  <div class="stack muted">
+                    <% user.orders.forEach(function(order) { %>
+                      <span><%= order.product.name %>: <strong><%= order.quantity %></strong></span>
+                    <% }) %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </article>
+
+  <article class="card">
+    <h2 class="section-title">Vis bestillinger pr produkt</h2>
+    <% if (!ordersByProduct.length) { %>
+      <div class="empty-state">
+        <h3>Ingen bestillinger ennå</h3>
+        <p>Det finnes ingen produktbestillinger å vise akkurat nå.</p>
+      </div>
+    <% } else { %>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Produkt</th>
+              <th>Antall brukere</th>
+              <th>Antall totalt</th>
+              <th>Totalsum</th>
+              <th>Detaljer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% ordersByProduct.forEach(function(product) { %>
+              <tr>
+                <td>
+                  <strong><a href="/admin/products/<%= product.id %>/edit"><%= product.name %></a></strong>
+                  <div class="muted"><%= product.breweryName || 'Uten bryggeri' %></div>
+                </td>
+                <td><%= product.totalUsers %></td>
+                <td><%= product.totalQuantity %></td>
+                <td><%= formatCurrency(product.totalValue) %></td>
+                <td>
+                  <div class="stack muted">
+                    <% product.orders.forEach(function(order) { %>
+                      <span><%= order.user.fullName %>: <strong><%= order.quantity %></strong></span>
+                    <% }) %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </article>
+</section>
+<%- include('../partials/footer') %>
