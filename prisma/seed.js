@@ -1,5 +1,7 @@
 require("dotenv").config();
 
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require("bcrypt");
 const { PrismaClient, UserRole, UserStatus, ProductStatus } = require("@prisma/client");
 
@@ -137,9 +139,50 @@ async function seedTestData() {
   console.log("Testdata ble kontrollert/opprettet.");
 }
 
+async function importProductsFromExportFile() {
+  if (process.env.SEED_IMPORT_PRODUCTS !== "true") {
+    return;
+  }
+
+  const filePath = path.join(process.cwd(), "scripts", "local-products-export.json");
+  if (!fs.existsSync(filePath)) {
+    console.log("Ingen lokal produkteksport funnet. Hopper over produktimport.");
+    return;
+  }
+
+  const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  const existingProducts = await prisma.product.findMany({
+    select: {
+      name: true,
+      breweryName: true
+    }
+  });
+
+  const existingKeys = new Set(
+    existingProducts.map((product) => `${product.breweryName || ""}::${product.name}`.toLowerCase())
+  );
+
+  const toCreate = payload.filter((product) => {
+    const key = `${product.breweryName || ""}::${product.name}`.toLowerCase();
+    return !existingKeys.has(key);
+  });
+
+  if (!toCreate.length) {
+    console.log("Ingen nye produkter å importere fra eksportfilen.");
+    return;
+  }
+
+  await prisma.product.createMany({
+    data: toCreate
+  });
+
+  console.log(`${toCreate.length} produkter ble importert fra lokal eksportfil.`);
+}
+
 async function main() {
   await upsertAdmin();
   await seedTestData();
+  await importProductsFromExportFile();
 }
 
 main()
