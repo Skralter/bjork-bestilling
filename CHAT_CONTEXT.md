@@ -1,203 +1,154 @@
 # Chat Context For Videre Arbeid
 
-Denne filen oppsummerer arbeidsøkten for prosjektet `BjørkBestilling` og skal brukes som referanse for videre endringer.
+Denne filen oppsummerer status for prosjektet `BjorkBestilling` per 23. juli 2026 og skal brukes som arbeidsgrunnlag for videre endringer.
 
-## Prosjektmål
+## Prosjekt
 
-Bygge en bestillingsapp for øl med:
+Appen er en bestillingsapp for ol med:
 
 - Node.js
 - Express
 - EJS
 - PostgreSQL
 - Prisma
-- bcrypt
-- express-session
-- PostgreSQL-basert session store
-- Helmet
-- rate limiting
+- session-lagring i PostgreSQL
 - CSRF-beskyttelse
-- Railway-klar deploy
+- Railway-deploy
 
-## Viktige produktkrav som gjelder nå
+## Viktige produktregler
 
-- Alle produkter er øl.
-- Alle priser skal forstås som `pris per stk`.
-- Hvis teksten sier `4-pack` eller lignende, betyr det at produktet må bestilles i et gitt trinn, for eksempel `4`, ikke at prisen er for hele pakken.
-- Produkter kan ha:
-  - bryggeri
-  - navn
-  - beskrivelse
-  - bilde
-  - pris
-  - status
-  - bestillingsfrist
-  - bestillingstrinn
-  - totalt tilgjengelig antall
+- Alle produkter er ol.
+- Alle priser skal tolkes som `pris per stk`.
+- Hvis et produkt sier `4-pack` eller lignende, betyr det at produktet ma bestilles i et fast trinn, for eksempel `4`.
+- Hvis det ikke finnes et sikkert produktbilde, skal appen vise `Produktbilde kommer` / plassholder i stedet for a gjette feil bilde.
 
-## Felter som ble fjernet fra aktiv brukerflyt
+## Viktige felter pa produkt
 
-Disse skal ikke brukes videre i produktgrensesnittet uten eksplisitt ønske:
+Produkter kan bruke disse feltene i flyten:
+
+- `breweryName`
+- `name`
+- `description`
+- `imageUrl`
+- `imageAttribution`
+- `price`
+- `status`
+- `orderDeadline`
+- `orderStep`
+- `totalAvailableQuantity`
+
+Felter som ikke skal tilbake i vanlig UI uten eksplisitt onske:
 
 - `unit`
 - `maxPerUser`
-- `sortOrder` som manuelt felt i adminskjema
+- manuell `sortOrder`
 
-Merk:
+## Ferdig bygget i appen
 
-- `sortOrder` finnes fortsatt i databasen, men brukes ikke som et aktivt adminfelt i UI.
+### Auth og sessions
 
-## Gjorte endringer i appen
-
-### Innlogging og sessions
-
-- Første admin opprettes via seed-script og miljøvariabler.
-- Session store er koblet til Prisma/PostgreSQL.
-- `Session`-modellen ble endret til å ha både `id` og `sid` fordi session-biblioteket krevde det.
-- CSRF-feil ved login ble løst ved å flytte `attachViewData` til etter `csurf`.
-- Utlogging krasjet fordi appen prøvde å bruke `flash` etter `session.destroy()`.
-  Dette ble løst ved å redirecte til:
-
-```text
-/auth/login?loggedOut=1
-```
-
-og vise meldingen direkte i login-viewet.
+- Innlogging, registrering og admin-godkjenning fungerer.
+- Prisma session store fungerer.
+- Logout-krasj ble fikset ved redirect til `/auth/login?loggedOut=1`.
+- CSRF-problem ved login og bestillingslagring ble fikset.
 
 ### Produktside for bruker
 
-Det er nå implementert:
+Dette fungerer na:
 
-- filter på bryggeri
-- sortering:
-  - `Nyeste først`
-  - `Alfabetisk`
+- filter pa bryggeri
+- sortering pa `Nyeste forst` og `Alfabetisk`
 - lagring av bestilling uten side-refresh
-- beholdning av filter og scrollposisjon ved lagring
-- oppdatering av:
-  - `Ditt antall nå`
-  - `Bestilt totalt av alle`
-
-Produktkort viser nå:
-
-- bryggeri
-- navn
-- beskrivelse
-- pris pr stk
-- status
-- bestillingsfrist
-- bestillingstrinn
-- totalt bestilt av alle
-- brukerens eget antall
+- filter og scrollposisjon beholdes ved lagring
+- visning av `Ditt antall na`
+- visning av `Bestilt totalt av alle`
+- forklaring om at pris er per stk
 
 ### Mine bestillinger
 
-- Produktnavnet i `Mine bestillinger` er klikkbart.
-- Lenken går til riktig produktkort på `/products` via anker:
-
-```text
-/products#product-<productId>
-```
+- Produktnavn er klikkbart.
+- Lenken gar til riktig produktkort pa produktsiden.
 
 ### Admin
 
-Det er nå implementert:
+Dette fungerer na:
 
 - opprette produkt
 - redigere produkt
-- masseinnlegg av produkter via liste
-- statusendring av produkter
-- sletting av produkter selv om de har bestillinger
+- masseinnlegg via liste
+- slette produkter selv om de har bestillinger
+- klikk fra admin-listen rett inn pa redigering av valgt produkt
+- egen oppsummeringsside for bestillinger per bruker og per produkt
 
-Viktig:
+### Navigasjon og navn
 
-- ved sletting av produkt med bestillinger slettes også tilhørende bestillinger i samme database-transaksjon
-
-### Brukeradministrasjon
-
-- select-feltene for brukerstatus fikk bedre styling fordi valglisten var visuelt utydelig
-
-## Masseinnlegg av produkter
-
-Det finnes en egen adminside for masseinnlegg.
-
-Forventet linjeformat:
-
-```text
-bryggeri; ølnavn; beskrivelse; pris; lager; bestillingstrinn; bestillingsfrist; status
-```
-
-Eksempel:
-
-```text
-Tree House Brewing Company; Double IPA; 8,2 % ABV, 16 oz, 4-pakning; 220; 24; 4; 2026-08-01T18:00; ACTIVE
-```
+- Venstre brukerfane heter `Ol`.
+- Hoyre adminfane heter `Varer`.
 
 ## Bilder
 
-Status nå:
+Status na:
 
-- Produktkort bruker samme faste bildestørrelse.
-- Hvis bilde ikke finnes, brukes plassholderen i `public/images/product-placeholder.svg`.
+- Alle produktkort bruker fast bildestorrelse.
+- Fallback-bilde brukes hvis vi ikke har sikkert bilde.
 
-Det ble vurdert:
+Det som er avklart:
 
-- Untappd scraper: ikke brukt
-- Untappd API: vurdert, men ikke valgt videre
-- Google image-søk: lagt opp som mulig vei, men med streng fallback-logikk
+- Untappd scraper brukes ikke.
+- Untappd API brukes ikke.
+- Tree House-lenken `https://orders.treehousebrew.com/oa/start-order?ml=d9kjvl6m8mrc31r7dbi7` kan ikke brukes fra dette miljoet, fordi siden svarer med `403` fra CloudFront.
+- VPN i USA kan ikke brukes fra dette miljoet.
 
-Nåværende regel:
+Anbefalt videre strategi for bilder:
 
-- hvis det ikke er et tydelig nok treff, skal plassholderbildet brukes
+- bruk manuell `imageUrl` nar vi har et sikkert bilde
+- ellers bruk plassholder
+- eventuell automatikk bor vaere konservativ og heller feile til plassholder enn a vise feil boks
 
-Merk:
+## Deploy og produksjon
 
-- Google-løsningen er konservativ og skal ikke anta at et bilde er korrekt uten tydelig match
+Appen er deployet pa Railway.
 
-## Batch-fil
+Viktige punkter:
 
-Det finnes en restart-fil:
+- GitHub-repo: `https://github.com/Skralter/bjork-bestilling`
+- Railway-app er oppe
+- eksisterende offentlig Railway-URL:
+  - `https://web-production-3e713.up.railway.app`
 
-- [restart-server.bat](C:/Users/wsand/OneDrive/Documents/Nettside%20Bjørk/restart-server.bat)
+Lokale produkter er importert til Railway-databasen.
 
-Den:
+### Custom domain
 
-- stopper prosess på port `3000`
-- åpner nytt vindu
-- starter `npm.cmd run dev`
+Det er satt opp gratis DNS hos deSEC med:
 
-## Kjente tekniske hensyn
+- `fredagschug.dedyn.io`
 
-### Ved frontend-lagring av bestilling
+Det er opprettet Railway custom domain som:
 
-Bestillinger lagres nå med `fetch` i bakgrunnen.
+- `app.fredagschug.dedyn.io`
 
-Viktig detalj:
+DNS-recordene hos deSEC ser riktige ut:
 
-- requesten må sendes som:
+- `CNAME app -> 57hzq53v.up.railway.app.`
+- `TXT _railway-verify.app -> "railway-verify=..."`
 
-```text
-application/x-www-form-urlencoded
-```
+Men sist sjekket 23. juli 2026 var domenet fortsatt ikke synlig offentlig, og Railway viste fortsatt:
 
-ikke som vanlig `FormData`/`multipart`, ellers finner ikke `csurf` `_csrf`-feltet riktig og svarer med HTML-feilside.
+- `Waiting for DNS update`
 
-### Ved restart
+Konklusjon na:
 
-Hvis appen krasjer med:
+- oppsettet ser riktig ut
+- problemet virker a vaere propagasjon/delegering, ikke feil input
 
-```text
-EADDRINUSE
-```
+## Hjelpefiler og drift
 
-betyr det at port `3000` allerede brukes av en eksisterende serverprosess.
+- `restart-server.bat` finnes for enkel restart av lokal server
+- `CHAT_CONTEXT.md` er hovedkontekst for videre arbeid
+- `TODO.md` er kort liste over neste oppgaver
 
-Bruk da:
-
-- `restart-server.bat`
-- eller stopp gammel server før ny start
-
-## Filer som er spesielt viktige videre
+## Filer som er sentrale videre
 
 - `prisma/schema.prisma`
 - `prisma/seed.js`
@@ -212,32 +163,15 @@ Bruk da:
 - `src/views/admin/products.ejs`
 - `src/views/admin/product-form.ejs`
 - `src/views/admin/bulk-products.ejs`
+- `src/views/admin/orders-summary.ejs`
+- `src/views/partials/header.ejs`
 - `public/js/app.js`
 - `public/css/styles.css`
 
-## Ting brukeren eksplisitt har ønsket
+## Viktige hensyn videre
 
-- mørk, varm stil
-- alle produktbilder i samme størrelse
-- filter og sortering på brukersiden
-- ingen refresh når bestilling lagres på produktsiden
-- totalsum bestilt av alle vist på produktkort
-- klikkbart produktnavn i `Mine bestillinger`
-- sletting av produkter også når det finnes bestillinger
-- tydelig forklaring om at pris alltid er per stk
-
-## Ting å være forsiktig med videre
-
-- Ikke gjeninnfør `unit`, `maxPerUser` eller unødvendige gamle produktfelt i UI uten at brukeren ber om det.
-- Ikke bryt den eksisterende async-lagringen på produktsiden.
-- Ikke fjern anker-ID-er på produktkort, siden `Mine bestillinger` lenker til dem.
-- Husk at brukeren er nybegynner og ønsker praktiske, direkte løsninger.
-
-## Neste naturlige forbedringer
-
-Mulige neste steg, dersom brukeren ber om mer:
-
-- søk på ølnavn på produktsiden
-- bedre visuell bekreftelse etter lagret bestilling
-- oppdatere README med de siste UI-endringene
-- rydde tegnkoding i enkelte eldre tekster som viser `Ã¸` i terminalutskrifter eller filer
+- Ikke gjeninnfor `unit`, `maxPerUser` eller gamle felt i UI uten at brukeren ber om det.
+- Ikke bryt async-lagringen pa produktsiden.
+- Ikke fjern ankerlenkene som `Mine bestillinger` bruker.
+- Vær konservativ med automatisk bildehenting.
+- Bruk praktiske og direkte losninger; brukeren onsker lite friksjon.
