@@ -4,7 +4,7 @@
   "description": "Produksjonsklar bestillingsapp med Express, EJS, Prisma og PostgreSQL.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run db:deploy && npm run db:seed && node server.js",
     "dev": "nodemon server.js",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
