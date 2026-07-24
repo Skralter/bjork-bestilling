@@ -82,6 +82,47 @@ document.addEventListener("DOMContentLoaded", () => {
     updateAdminProductSearch();
   }
 
+  const productSearch = document.querySelector("[data-product-search]");
+  const productCards = Array.from(document.querySelectorAll("[data-product-card]"));
+  const productSearchFeedback = document.querySelector("[data-product-search-feedback]");
+  const productSearchEmpty = document.querySelector("[data-product-search-empty]");
+  const productsGrid = document.querySelector("[data-products-grid]");
+
+  if (productSearch && productCards.length) {
+    const updateProductSearch = () => {
+      const query = productSearch.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      productCards.forEach((card) => {
+        const haystack = card.getAttribute("data-product-search-text") || "";
+        const matches = !query || haystack.includes(query);
+
+        card.hidden = !matches;
+
+        if (matches) {
+          visibleCount += 1;
+        }
+      });
+
+      if (productSearchFeedback) {
+        productSearchFeedback.textContent = query
+          ? `Viser ${visibleCount} treff for "${productSearch.value.trim()}".`
+          : `Viser alle ${productCards.length} produkter.`;
+      }
+
+      if (productSearchEmpty) {
+        productSearchEmpty.hidden = visibleCount !== 0;
+      }
+
+      if (productsGrid) {
+        productsGrid.hidden = visibleCount === 0;
+      }
+    };
+
+    productSearch.addEventListener("input", updateProductSearch);
+    updateProductSearch();
+  }
+
   document.querySelectorAll("[data-async-order-form]").forEach((form) => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();

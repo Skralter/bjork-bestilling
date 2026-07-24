@@ -24,12 +24,24 @@
           <option value="alphabetical" <%= filters.sort === 'alphabetical' ? 'selected' : '' %>>Alfabetisk</option>
         </select>
       </label>
+      <label style="min-width: 260px;">
+        Søk
+        <input
+          type="search"
+          placeholder="Skriv navn eller bryggeri..."
+          autocomplete="off"
+          data-product-search
+        >
+      </label>
     </div>
     <div class="button-row">
       <button class="btn-secondary" type="submit">Filtrer</button>
       <a class="btn-soft" href="/products">Nullstill</a>
     </div>
   </form>
+  <p class="muted admin-search-feedback" data-product-search-feedback>
+    Viser alle <%= products.length %> produkter.
+  </p>
 </section>
 
 <% if (!products.length) { %>
@@ -38,9 +50,14 @@
     <p>Det finnes ingen produkter å bestille akkurat nå.</p>
   </section>
 <% } else { %>
-  <section class="grid products-grid">
+  <section class="grid products-grid" data-products-grid>
     <% products.forEach(function(product) { %>
-      <article class="card" id="product-<%= product.id %>" data-product-card>
+      <article
+        class="card"
+        id="product-<%= product.id %>"
+        data-product-card
+        data-product-search-text="<%= `${product.name} ${product.breweryName || ''}`.toLowerCase() %>"
+      >
         <img class="product-image" src="<%= product.imageUrl || '/images/product-placeholder.svg' %>" alt="Bilde av <%= product.name %>">
         <h2><%= product.name %></h2>
         <% if (product.breweryName) { %><p class="muted"><strong><%= product.breweryName %></strong></p><% } %>
@@ -82,6 +99,11 @@
         </form>
       </article>
     <% }) %>
+  </section>
+
+  <section class="empty-state" data-product-search-empty hidden>
+    <h2>Ingen treff</h2>
+    <p>Ingen produkter matcher søket ditt akkurat nå.</p>
   </section>
 <% } %>
 <%- include('../partials/footer') %>
