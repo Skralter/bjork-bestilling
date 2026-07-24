@@ -61,12 +61,11 @@
                 <a class="btn-soft" href="/admin/products/<%= product.id %>/orders">Bestillinger</a>
                 <form method="post" action="/admin/products/<%= product.id %>/status">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <select name="status" aria-label="Velg status for <%= product.name %>">
+                  <select name="status" aria-label="Velg status for <%= product.name %>" data-auto-submit-input>
                     <% Object.values(ProductStatus).forEach(function(status) { %>
                       <option value="<%= status %>" <%= product.status === status ? 'selected' : '' %>><%= status %></option>
                     <% }) %>
                   </select>
-                  <button class="btn-secondary" type="submit">Oppdater status</button>
                 </form>
                 <form method="post" action="/admin/products/<%= product.id %>/delete" data-confirm="Er du sikker på at du vil slette dette produktet permanent? Dette sletter også alle bestillinger på produktet.">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">

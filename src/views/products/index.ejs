@@ -10,7 +10,7 @@
     <div class="inline-form">
       <label style="min-width: 220px;">
         Bryggeri
-        <select name="brewery">
+        <select name="brewery" data-auto-submit-input>
           <option value="">Alle bryggerier</option>
           <% breweries.forEach(function(breweryName) { %>
             <option value="<%= breweryName %>" <%= filters.brewery === breweryName ? 'selected' : '' %>><%= breweryName %></option>
@@ -19,7 +19,7 @@
       </label>
       <label style="min-width: 220px;">
         Sortering
-        <select name="sort">
+        <select name="sort" data-auto-submit-input>
           <option value="newest" <%= filters.sort === 'newest' ? 'selected' : '' %>>Nyeste først</option>
           <option value="alphabetical" <%= filters.sort === 'alphabetical' ? 'selected' : '' %>>Alfabetisk</option>
         </select>
@@ -35,7 +35,6 @@
       </label>
     </div>
     <div class="button-row">
-      <button class="btn-secondary" type="submit">Filtrer</button>
       <a class="btn-soft" href="/products">Nullstill</a>
     </div>
   </form>

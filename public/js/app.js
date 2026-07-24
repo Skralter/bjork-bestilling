@@ -41,6 +41,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  document.querySelectorAll("[data-auto-submit-input]").forEach((input) => {
+    input.addEventListener("change", () => {
+      const form = input.closest("form");
+      if (form) {
+        form.requestSubmit();
+      }
+    });
+  });
+
   const adminProductSearch = document.querySelector("[data-admin-product-search]");
   const adminProductRows = Array.from(document.querySelectorAll("[data-admin-product-row]"));
   const adminProductSearchFeedback = document.querySelector("[data-admin-product-search-feedback]");

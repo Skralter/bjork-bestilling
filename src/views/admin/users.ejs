@@ -36,13 +36,12 @@
             <div class="stack">
               <form class="inline-form" method="post" action="/admin/users/<%= user.id %>/status">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                <select class="admin-select" name="status" aria-label="Velg status for <%= user.username %>">
+                <select class="admin-select" name="status" aria-label="Velg status for <%= user.username %>" data-auto-submit-input>
                   <option value="APPROVED" <%= user.status === 'APPROVED' ? 'selected' : '' %>>Godkjent</option>
                   <option value="PENDING" <%= user.status === 'PENDING' ? 'selected' : '' %>>Ventende</option>
                   <option value="REJECTED" <%= user.status === 'REJECTED' ? 'selected' : '' %>>Avslått</option>
                   <option value="DISABLED" <%= user.status === 'DISABLED' ? 'selected' : '' %>>Deaktivert</option>
                 </select>
-                <button class="btn-secondary" type="submit">Lagre status</button>
               </form>
               <form class="inline-form" method="post" action="/admin/users/<%= user.id %>/role" data-confirm="Er du sikker på at du vil endre rollen til denne brukeren?">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
