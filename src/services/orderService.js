@@ -113,7 +113,10 @@ async function upsertOrder({ userId, productId, quantity }) {
 
 async function getUserOrders(userId) {
   return prisma.order.findMany({
-    where: { userId },
+    where: {
+      userId,
+      pickedUpAt: null
+    },
     include: {
       product: true
     },

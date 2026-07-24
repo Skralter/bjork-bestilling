@@ -21,5 +21,6 @@ router.post("/products/:productId/status", requireAdmin, adminController.changeP
 router.post("/products/:productId/delete", requireAdmin, adminController.deleteProduct);
 router.get("/products/:productId/orders", requireAdmin, adminController.showProductOrders);
 router.get("/products/:productId/orders/export", requireAdmin, adminController.exportProductOrdersCsv);
+router.post("/orders/:orderId/flag", requireAdmin, adminController.toggleOrderFlag);
 
 module.exports = router;

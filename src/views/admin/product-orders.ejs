@@ -47,6 +47,8 @@
             <th>Navn</th>
             <th>Brukernavn</th>
             <th>Antall</th>
+            <th>Betalt</th>
+            <th>Hentet</th>
             <th>Opprettet</th>
             <th>Sist endret</th>
             <th>Totalsum</th>
@@ -57,7 +59,29 @@
             <tr>
               <td><%= order.user.fullName %></td>
               <td><%= order.user.username %></td>
-              <td><%= order.quantity %></td>
+              <td><strong><%= order.quantity %></strong></td>
+              <td>
+                <div class="stack">
+                  <form method="post" action="/admin/orders/<%= order.id %>/flag">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="paid">
+                    <input type="hidden" name="redirectTo" value="/admin/products/<%= product.id %>/orders">
+                    <button class="<%= order.paidAt ? 'btn-soft' : 'btn-secondary' %>" type="submit">BETALT</button>
+                  </form>
+                  <span class="muted"><%= order.paidAt ? formatDateTime(order.paidAt) : 'Ikke betalt' %></span>
+                </div>
+              </td>
+              <td>
+                <div class="stack">
+                  <form method="post" action="/admin/orders/<%= order.id %>/flag">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="hidden" name="action" value="pickedUp">
+                    <input type="hidden" name="redirectTo" value="/admin/products/<%= product.id %>/orders">
+                    <button class="<%= order.pickedUpAt ? 'btn-soft' : 'btn-secondary' %>" type="submit">HENTET</button>
+                  </form>
+                  <span class="muted"><%= order.pickedUpAt ? formatDateTime(order.pickedUpAt) : 'Ikke hentet' %></span>
+                </div>
+              </td>
               <td><%= formatDateTime(order.createdAt) %></td>
               <td><%= formatDateTime(order.updatedAt) %></td>
               <td><%= product.price ? formatCurrency(Number(product.price) * order.quantity) : 'Ikke satt' %></td>

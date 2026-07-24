@@ -69,6 +69,8 @@ model Order {
   quantity  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  paidAt    DateTime?
+  pickedUpAt DateTime?
   userId    String
   productId String
   user      User     @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)

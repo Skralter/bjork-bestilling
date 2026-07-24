@@ -16,6 +16,9 @@ async function listActiveProductsWithOrders(userId, options = {}) {
     },
     include: {
       orders: {
+        where: {
+          pickedUpAt: null
+        },
         select: {
           quantity: true,
           userId: true

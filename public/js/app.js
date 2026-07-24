@@ -50,6 +50,78 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  document.querySelectorAll("[data-order-flag-form]").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const submitButton = form.querySelector("button[type='submit']");
+      const actionInput = form.querySelector("input[name='action']");
+      const action = actionInput?.value;
+      const orderLine = form.closest("[data-order-line]");
+      const summaryRow = form.closest("[data-order-summary-row]");
+      const requestUrl = form.getAttribute("data-order-flag-url") || form.getAttribute("action") || "";
+
+      if (!submitButton || !action || !orderLine || !requestUrl) {
+        return;
+      }
+
+      const formData = new FormData(form);
+      const requestBody = new URLSearchParams();
+      formData.forEach((value, key) => {
+        requestBody.append(key, value);
+      });
+
+      submitButton.disabled = true;
+
+      try {
+        const response = await fetch(requestUrl, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+          },
+          body: requestBody.toString()
+        });
+        const responseText = await response.text();
+        let data;
+
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          throw new Error("Serveren svarte ikke med gyldig JSON. Prøv å laste siden på nytt.");
+        }
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || `Kunne ikke oppdatere status (${response.status}).`);
+        }
+
+        submitButton.classList.toggle("is-active", Boolean(data.active));
+
+        const historyNode = orderLine.querySelector(`[data-flag-history='${action}']`);
+        if (historyNode) {
+          historyNode.textContent = data.active
+            ? `${action === "paid" ? "Betalt" : "Hentet"} ${data.timestamp}`
+            : action === "paid"
+              ? "Ikke betalt"
+              : "Ikke hentet";
+        }
+
+        if (summaryRow) {
+          const countNode = summaryRow.querySelector(`[data-flag-count='${action}']`);
+          if (countNode) {
+            const activeCount = summaryRow.querySelectorAll(`[data-flag-button='${action}'].is-active`).length;
+            countNode.textContent = String(activeCount);
+          }
+        }
+      } catch (error) {
+        window.alert(error.message || "Kunne ikke oppdatere status.");
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+  });
+
   const adminProductSearch = document.querySelector("[data-admin-product-search]");
   const adminProductRows = Array.from(document.querySelectorAll("[data-admin-product-row]"));
   const adminProductSearchFeedback = document.querySelector("[data-admin-product-search-feedback]");

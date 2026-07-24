@@ -141,7 +141,7 @@ async function getOrdersSummary() {
             product: true
           },
           orderBy: {
-            updatedAt: "desc"
+            createdAt: "desc"
           }
         }
       },
@@ -161,7 +161,7 @@ async function getOrdersSummary() {
             user: true
           },
           orderBy: {
-            updatedAt: "desc"
+            createdAt: "desc"
           }
         }
       },
@@ -176,11 +176,15 @@ async function getOrdersSummary() {
     const totalValue = user.orders.reduce((sum, order) => {
       return sum + Number(order.product.price || 0) * order.quantity;
     }, 0);
+    const paidOrderCount = user.orders.filter((order) => Boolean(order.paidAt)).length;
+    const pickedUpOrderCount = user.orders.filter((order) => Boolean(order.pickedUpAt)).length;
 
     return {
       ...user,
       totalQuantity,
-      totalValue
+      totalValue,
+      paidOrderCount,
+      pickedUpOrderCount
     };
   });
 
@@ -190,12 +194,16 @@ async function getOrdersSummary() {
     const totalValue = product.orders.reduce((sum, order) => {
       return sum + Number(product.price || 0) * order.quantity;
     }, 0);
+    const paidOrderCount = product.orders.filter((order) => Boolean(order.paidAt)).length;
+    const pickedUpOrderCount = product.orders.filter((order) => Boolean(order.pickedUpAt)).length;
 
     return {
       ...product,
       totalQuantity,
       totalUsers,
-      totalValue
+      totalValue,
+      paidOrderCount,
+      pickedUpOrderCount
     };
   });
 
@@ -207,7 +215,7 @@ async function getOrdersSummary() {
 
 function buildProductOrdersCsv(product, orders) {
   const rows = [
-    ["Produktnavn", "Fullt navn", "Brukernavn", "Antall", "Pris per enhet", "Totalsum", "Opprettet", "Sist endret"]
+    ["Produktnavn", "Fullt navn", "Brukernavn", "Antall", "Betalt", "Hentet", "Pris per enhet", "Totalsum", "Opprettet", "Sist endret"]
   ];
 
   for (const order of orders) {
@@ -217,6 +225,8 @@ function buildProductOrdersCsv(product, orders) {
       order.user.fullName,
       order.user.username,
       order.quantity,
+      order.paidAt ? new Date(order.paidAt).toISOString() : "",
+      order.pickedUpAt ? new Date(order.pickedUpAt).toISOString() : "",
       price.toFixed(2),
       (price * order.quantity).toFixed(2),
       new Date(order.createdAt).toISOString(),

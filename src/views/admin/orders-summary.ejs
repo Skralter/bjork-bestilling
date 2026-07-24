@@ -21,12 +21,14 @@
               <th>Antall produkter</th>
               <th>Antall totalt</th>
               <th>Totalsum</th>
+              <th>Betalt</th>
+              <th>Hentet</th>
               <th>Detaljer</th>
             </tr>
           </thead>
           <tbody>
             <% ordersByUser.forEach(function(user) { %>
-              <tr>
+              <tr data-order-summary-row>
                 <td>
                   <strong><%= user.fullName %></strong>
                   <div class="muted"><%= user.username %></div>
@@ -34,10 +36,36 @@
                 <td><%= user.orders.length %></td>
                 <td><%= user.totalQuantity %></td>
                 <td><%= formatCurrency(user.totalValue) %></td>
+                <td><span data-flag-count="paid"><%= user.paidOrderCount %></span> / <%= user.orders.length %></td>
+                <td><span data-flag-count="pickedUp"><%= user.pickedUpOrderCount %></span> / <%= user.orders.length %></td>
                 <td>
                   <div class="stack muted">
                     <% user.orders.forEach(function(order) { %>
-                      <span><%= order.product.name %>: <strong><%= order.quantity %></strong></span>
+                      <div class="order-detail-line" data-order-line>
+                        <div class="order-detail-topline">
+                          <span class="order-detail-name"><%= order.product.name %>: <strong><%= order.quantity %></strong></span>
+                          <div class="order-flag-actions">
+                            <form method="post" action="/admin/orders/<%= order.id %>/flag" data-order-flag-form data-order-flag-url="/admin/orders/<%= order.id %>/flag">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <input type="hidden" name="ajax" value="1">
+                              <input type="hidden" name="action" value="paid">
+                              <input type="hidden" name="redirectTo" value="/admin/orders">
+                              <button class="order-flag-button <%= order.paidAt ? 'is-active' : '' %>" type="submit" data-flag-button="paid">BETALT</button>
+                            </form>
+                            <form method="post" action="/admin/orders/<%= order.id %>/flag" data-order-flag-form data-order-flag-url="/admin/orders/<%= order.id %>/flag">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <input type="hidden" name="ajax" value="1">
+                              <input type="hidden" name="action" value="pickedUp">
+                              <input type="hidden" name="redirectTo" value="/admin/orders">
+                              <button class="order-flag-button <%= order.pickedUpAt ? 'is-active' : '' %>" type="submit" data-flag-button="pickedUp">HENTET</button>
+                            </form>
+                          </div>
+                        </div>
+                        <div class="order-flag-history">
+                          <span data-flag-history="paid"><%= order.paidAt ? `Betalt ${formatDateTime(order.paidAt)}` : 'Ikke betalt' %></span>
+                          <span data-flag-history="pickedUp"><%= order.pickedUpAt ? `Hentet ${formatDateTime(order.pickedUpAt)}` : 'Ikke hentet' %></span>
+                        </div>
+                      </div>
                     <% }) %>
                   </div>
                 </td>
@@ -65,12 +93,14 @@
               <th>Antall brukere</th>
               <th>Antall totalt</th>
               <th>Totalsum</th>
+              <th>Betalt</th>
+              <th>Hentet</th>
               <th>Detaljer</th>
             </tr>
           </thead>
           <tbody>
             <% ordersByProduct.forEach(function(product) { %>
-              <tr>
+              <tr data-order-summary-row>
                 <td>
                   <strong><a href="/admin/products/<%= product.id %>/edit"><%= product.name %></a></strong>
                   <div class="muted"><%= product.breweryName || 'Uten bryggeri' %></div>
@@ -78,10 +108,36 @@
                 <td><%= product.totalUsers %></td>
                 <td><%= product.totalQuantity %></td>
                 <td><%= formatCurrency(product.totalValue) %></td>
+                <td><span data-flag-count="paid"><%= product.paidOrderCount %></span> / <%= product.orders.length %></td>
+                <td><span data-flag-count="pickedUp"><%= product.pickedUpOrderCount %></span> / <%= product.orders.length %></td>
                 <td>
                   <div class="stack muted">
                     <% product.orders.forEach(function(order) { %>
-                      <span><%= order.user.fullName %>: <strong><%= order.quantity %></strong></span>
+                      <div class="order-detail-line" data-order-line>
+                        <div class="order-detail-topline">
+                          <span class="order-detail-name"><%= order.user.fullName %>: <strong><%= order.quantity %></strong></span>
+                          <div class="order-flag-actions">
+                            <form method="post" action="/admin/orders/<%= order.id %>/flag" data-order-flag-form data-order-flag-url="/admin/orders/<%= order.id %>/flag">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <input type="hidden" name="ajax" value="1">
+                              <input type="hidden" name="action" value="paid">
+                              <input type="hidden" name="redirectTo" value="/admin/orders">
+                              <button class="order-flag-button <%= order.paidAt ? 'is-active' : '' %>" type="submit" data-flag-button="paid">BETALT</button>
+                            </form>
+                            <form method="post" action="/admin/orders/<%= order.id %>/flag" data-order-flag-form data-order-flag-url="/admin/orders/<%= order.id %>/flag">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <input type="hidden" name="ajax" value="1">
+                              <input type="hidden" name="action" value="pickedUp">
+                              <input type="hidden" name="redirectTo" value="/admin/orders">
+                              <button class="order-flag-button <%= order.pickedUpAt ? 'is-active' : '' %>" type="submit" data-flag-button="pickedUp">HENTET</button>
+                            </form>
+                          </div>
+                        </div>
+                        <div class="order-flag-history">
+                          <span data-flag-history="paid"><%= order.paidAt ? `Betalt ${formatDateTime(order.paidAt)}` : 'Ikke betalt' %></span>
+                          <span data-flag-history="pickedUp"><%= order.pickedUpAt ? `Hentet ${formatDateTime(order.pickedUpAt)}` : 'Ikke hentet' %></span>
+                        </div>
+                      </div>
                     <% }) %>
                   </div>
                 </td>

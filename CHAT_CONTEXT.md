@@ -83,6 +83,10 @@ Dette fungerer na:
 - klikk fra admin-listen rett inn pa redigering av valgt produkt
 - egen oppsummeringsside for bestillinger per bruker og per produkt
 - typeahead-sok pa `/admin/products`
+- `BETALT` og `HENTET` kan toggles direkte i admin-oppsummeringen
+- statusknappene oppdaterer uten vanlig side-refresh
+- async-feil rundt HTML/JSON og gamle localhost-prosesser ble feilsokt og fikset lokalt
+- brukerbestillinger med `HENTET` skjules fra vanlige aktive brukerbestillinger
 
 ### Navigasjon og navn
 
@@ -188,6 +192,7 @@ De er ikke en del av den vanlige appflyten og kan sannsynligvis ryddes bort sene
 
 - Ikke gjeninnfor `unit`, `maxPerUser` eller gamle felt i UI uten at brukeren ber om det.
 - Ikke bryt async-lagringen pa produktsiden.
+- Ikke bryt async-statusknappene for `BETALT` og `HENTET` i adminvisningene.
 - Ikke fjern ankerlenkene som `Mine bestillinger` bruker.
 - Vaer konservativ med automatisk bildehenting.
 - Bruk praktiske og direkte losninger; brukeren onsker lite friksjon.

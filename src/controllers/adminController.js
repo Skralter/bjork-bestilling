@@ -392,6 +392,75 @@ async function exportProductOrdersCsv(req, res, next) {
   }
 }
 
+async function toggleOrderFlag(req, res, next) {
+  const redirectTo = String(req.body.redirectTo || req.get("referer") || "/admin/orders");
+  const action = String(req.body.action || "").trim();
+  const wantsJson =
+    req.body.ajax === "1" ||
+    req.xhr ||
+    req.get("x-requested-with") === "XMLHttpRequest" ||
+    (req.get("accept") || "").includes("application/json");
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: req.params.orderId }
+    });
+
+    if (!order) {
+      if (wantsJson) {
+        return res.status(404).json({ success: false, message: "Bestillingen finnes ikke." });
+      }
+      req.flash("error", "Bestillingen finnes ikke.");
+      return res.redirect(redirectTo);
+    }
+
+    if (action !== "paid" && action !== "pickedUp") {
+      if (wantsJson) {
+        return res.status(400).json({ success: false, message: "Ugyldig handling." });
+      }
+      req.flash("error", "Ugyldig handling.");
+      return res.redirect(redirectTo);
+    }
+
+    const fieldName = action === "paid" ? "paidAt" : "pickedUpAt";
+    const nextValue = order[fieldName] ? null : new Date();
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: req.params.orderId },
+      data: {
+        [fieldName]: nextValue
+      }
+    });
+
+    if (wantsJson) {
+      return res.json({
+        success: true,
+        action,
+        active: Boolean(updatedOrder[fieldName]),
+        timestamp: updatedOrder[fieldName]
+          ? new Intl.DateTimeFormat("nb-NO", {
+              dateStyle: "long",
+              timeStyle: "short"
+            }).format(new Date(updatedOrder[fieldName]))
+          : null,
+        message: action === "paid" ? "Betalingsstatus ble oppdatert." : "Hentestatus ble oppdatert."
+      });
+    }
+
+    req.flash("success", action === "paid" ? "Betalingsstatus ble oppdatert." : "Hentestatus ble oppdatert.");
+    return res.redirect(redirectTo);
+  } catch (error) {
+    if (wantsJson) {
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Kunne ikke oppdatere status."
+      });
+    }
+
+    return next(error);
+  }
+}
+
 module.exports = {
   showDashboard,
   listUsers,
@@ -408,5 +477,6 @@ module.exports = {
   changeProductStatus,
   deleteProduct,
   showProductOrders,
-  exportProductOrdersCsv
+  exportProductOrdersCsv,
+  toggleOrderFlag
 };
