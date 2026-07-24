@@ -41,6 +41,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  const adminProductSearch = document.querySelector("[data-admin-product-search]");
+  const adminProductRows = Array.from(document.querySelectorAll("[data-admin-product-row]"));
+  const adminProductSearchFeedback = document.querySelector("[data-admin-product-search-feedback]");
+  const adminProductEmpty = document.querySelector("[data-admin-product-empty]");
+  const adminProductsTableBody = document.querySelector("[data-admin-products-table-body]");
+
+  if (adminProductSearch && adminProductRows.length) {
+    const updateAdminProductSearch = () => {
+      const query = adminProductSearch.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      adminProductRows.forEach((row) => {
+        const haystack = row.getAttribute("data-product-search-text") || "";
+        const matches = !query || haystack.includes(query);
+
+        row.hidden = !matches;
+
+        if (matches) {
+          visibleCount += 1;
+        }
+      });
+
+      if (adminProductSearchFeedback) {
+        adminProductSearchFeedback.textContent = query
+          ? `Viser ${visibleCount} treff for "${adminProductSearch.value.trim()}".`
+          : `Viser alle ${adminProductRows.length} varer.`;
+      }
+
+      if (adminProductEmpty) {
+        adminProductEmpty.hidden = visibleCount !== 0;
+      }
+
+      if (adminProductsTableBody) {
+        adminProductsTableBody.parentElement.hidden = visibleCount === 0;
+      }
+    };
+
+    adminProductSearch.addEventListener("input", updateAdminProductSearch);
+    updateAdminProductSearch();
+  }
+
   document.querySelectorAll("[data-async-order-form]").forEach((form) => {
     form.addEventListener("submit", async (event) => {
       event.preventDefault();

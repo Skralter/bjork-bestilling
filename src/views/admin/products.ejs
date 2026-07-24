@@ -14,6 +14,21 @@
     <p>Opprett det første produktet for å komme i gang.</p>
   </section>
 <% } else { %>
+  <section class="card admin-search-card">
+    <label class="admin-search-field">
+      Søk i varer
+      <input
+        type="search"
+        placeholder="Skriv navn eller bryggeri..."
+        autocomplete="off"
+        data-admin-product-search
+      >
+    </label>
+    <p class="muted admin-search-feedback" data-admin-product-search-feedback>
+      Viser alle <%= products.length %> varer.
+    </p>
+  </section>
+
   <section class="table-wrap">
     <table>
       <thead>
@@ -26,9 +41,12 @@
           <th>Handlinger</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody data-admin-products-table-body>
         <% products.forEach(function(product) { %>
-          <tr>
+          <tr
+            data-admin-product-row
+            data-product-search-text="<%= `${product.name} ${product.breweryName || ''}`.toLowerCase() %>"
+          >
             <td>
               <strong><a href="/admin/products/<%= product.id %>/edit"><%= product.name %></a></strong>
               <div class="muted"><%= product.breweryName || 'Uten bryggeri' %></div>
@@ -60,6 +78,11 @@
         <% }) %>
       </tbody>
     </table>
+  </section>
+
+  <section class="empty-state" data-admin-product-empty hidden>
+    <h2>Ingen treff</h2>
+    <p>Ingen varer matcher søket ditt akkurat nå.</p>
   </section>
 <% } %>
 <%- include('../partials/footer') %>

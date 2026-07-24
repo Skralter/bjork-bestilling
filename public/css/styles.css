@@ -384,6 +384,20 @@ a:focus-visible {
   border: 1px solid var(--border);
 }
 
+.admin-search-card {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.admin-search-field {
+  max-width: 420px;
+}
+
+.admin-search-feedback {
+  margin: 0;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
