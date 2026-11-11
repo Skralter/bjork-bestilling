@@ -1,7 +1,7 @@
 <%- include('../partials/header') %>
 <section class="hero">
   <h1>Masseinnlegg produkter</h1>
-  <p>Legg inn ett øl per linje: bryggeri; ølnavn. Bare bryggeri og ølnavn er påkrevd.</p>
+  <p>Fyll inn bryggerinavn og ølnavn. Du kan legge inn flere øl fra samme bryggeri ved å skrive ett ølnavn per linje.</p>
 </section>
 
 <section class="card">
@@ -16,8 +16,12 @@
   <form class="form-grid" method="post" action="/admin/products/bulk">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <label>
-      Produktliste
-      <textarea name="rows" required rows="10" aria-describedby="bulk-products-help" placeholder="Tree House; Julius&#10;Tree House; Green&#10;Lervig; Lucky Jack"><%= formData.rows || '' %></textarea>
+      Bryggerinavn
+      <input type="text" name="breweryName" required value="<%= formData.breweryName || '' %>" placeholder="For eksempel Tree House">
+    </label>
+    <label>
+      Ølnavn
+      <textarea name="rows" required rows="10" aria-describedby="bulk-products-help" placeholder="Julius&#10;Green&#10;Haze"><%= formData.rows || '' %></textarea>
     </label>
     <% if (hasGoogleImageSearchCredentials) { %>
       <label style="display:flex; gap:0.75rem; align-items:center; font-weight:500;">
@@ -31,10 +35,6 @@
     </div>
   </form>
 
-  <div id="bulk-products-help" class="footer-note">
-    <p>Du kan også fylle ut flere felt i denne rekkefølgen: bryggeri; ølnavn; beskrivelse; pris; lager; bestillingstrinn; bestillingsfrist; status.</p>
-    <p>Eksempel med flere felt: Lervig; Lucky Jack; Frisk pale ale; 59; 48; 4</p>
-    <p>Uten flere felt lagres ølet med tom beskrivelse, uten pris, lagergrense eller bestillingsfrist, bestillingstrinn 1 og status ACTIVE. Status kan være ACTIVE, INACTIVE, SOLD_OUT eller ARCHIVED.</p>
-  </div>
+  <p id="bulk-products-help" class="footer-note">Skriv ett ølnavn per linje. Alle ølene får bryggerinavnet over. Beskrivelse, pris og lager kan fylles ut ved å redigere ølene etterpå.</p>
 </section>
 <%- include('../partials/footer') %>

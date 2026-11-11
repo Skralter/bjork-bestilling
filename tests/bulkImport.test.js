@@ -56,7 +56,7 @@ test("masseinnlegging lagrer bryggeri og ølnavn gjennom controlleren", async ()
   try {
     let redirect;
     await createBulkProducts({
-      body: { rows: "Tree House; Julius\nLervig; Lucky Jack" },
+      body: { breweryName: "Tree House", rows: "Julius\nGreen" },
       flash: () => {}
     }, {
       redirect: (url) => { redirect = url; },
@@ -66,11 +66,20 @@ test("masseinnlegging lagrer bryggeri og ølnavn gjennom controlleren", async ()
     assert.equal(saved.length, 2);
     assert.equal(saved[0].breweryName, "Tree House");
     assert.equal(saved[0].name, "Julius");
-    assert.equal(saved[1].breweryName, "Lervig");
-    assert.equal(saved[1].name, "Lucky Jack");
+    assert.equal(saved[1].breweryName, "Tree House");
+    assert.equal(saved[1].name, "Green");
     assert.equal(saved[0].description, "");
   } finally {
     prisma.product.createMany = original;
     await prisma.$disconnect();
   }
+});
+
+test("to separate bokser bruker felles bryggeri og ett ølnavn per linje", () => {
+  const result = parseBulkProductLines(" Julius \r\nGreen\n\nHaze", { breweryName: " Tree House " });
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result.products.map(p => [p.breweryName, p.name]), [
+    ["Tree House", "Julius"], ["Tree House", "Green"], ["Tree House", "Haze"]
+  ]);
+  assert.equal(parseBulkProductLines("Julius", { breweryName: " " }).errors.length, 1);
 });

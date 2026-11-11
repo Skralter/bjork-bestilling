@@ -1,4 +1,4 @@
-function parseBulkProductLines(rawText) {
+function parseBulkProductLines(rawText, { breweryName: commonBrewery } = {}) {
   const lines = String(rawText || "")
     .split(/\r?\n/)
     .map((line) => line.trim())
@@ -8,7 +8,9 @@ function parseBulkProductLines(rawText) {
   const errors = [];
 
   lines.forEach((line, index) => {
-    const parts = line.split(";").map((part) => part.trim());
+    const parts = commonBrewery === undefined
+      ? line.split(";").map((part) => part.trim())
+      : [String(commonBrewery || "").trim(), line];
 
     if (parts.length < 2 || !parts[0] || !parts[1]) {
       errors.push(`Linje ${index + 1}: Du må minst oppgi bryggeri og ølnavn.`);

@@ -223,20 +223,20 @@ async function updateProduct(req, res, next) {
 function showBulkCreate(req, res) {
   res.render("admin/bulk-products", {
     pageTitle: "Masseinnlegg produkter",
-    formData: { rows: "" },
+    formData: { breweryName: "", rows: "" },
     ProductStatus,
     hasGoogleImageSearchCredentials: hasGoogleImageSearchCredentials()
   });
 }
 
 async function createBulkProducts(req, res) {
-  const { products, errors } = parseBulkProductLines(req.body.rows);
+  const { products, errors } = parseBulkProductLines(req.body.rows, { breweryName: req.body.breweryName });
 
   if (!products.length || errors.length) {
     return res.status(422).render("admin/bulk-products", {
       pageTitle: "Masseinnlegg produkter",
       errors: errors.length ? errors : ["Legg inn minst én linje."],
-      formData: { rows: req.body.rows || "" },
+      formData: { breweryName: req.body.breweryName || "", rows: req.body.rows || "" },
       ProductStatus,
       hasGoogleImageSearchCredentials: hasGoogleImageSearchCredentials()
     });
@@ -281,7 +281,7 @@ async function createBulkProducts(req, res) {
     return res.status(422).render("admin/bulk-products", {
       pageTitle: "Masseinnlegg produkter",
       errors: [error.message],
-      formData: { rows: req.body.rows || "" },
+      formData: { breweryName: req.body.breweryName || "", rows: req.body.rows || "" },
       ProductStatus,
       hasGoogleImageSearchCredentials: hasGoogleImageSearchCredentials()
     });
