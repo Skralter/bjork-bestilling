@@ -249,7 +249,7 @@ async function createBulkProducts(req, res) {
       const { errors: rowErrors, payload } = validateProductInput({
         ...row,
         autoFetchImage: req.body.autoFetchImage
-      });
+      }, { requireDescription: false });
 
       if (rowErrors.length) {
         throw new Error(`${row.name || "Uten navn"}: ${rowErrors.join(" ")}`);

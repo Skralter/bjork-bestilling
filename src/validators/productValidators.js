@@ -20,7 +20,7 @@ function normalizeOptionalInteger(value) {
   return Number.isInteger(numericValue) ? numericValue : Number.NaN;
 }
 
-function validateProductInput(body) {
+function validateProductInput(body, { requireDescription = true } = {}) {
   const payload = {
     breweryName: String(body.breweryName || "").trim() || null,
     name: String(body.name || "").trim(),
@@ -42,7 +42,7 @@ function validateProductInput(body) {
     errors.push("Produktnavn er obligatorisk.");
   }
 
-  if (!payload.description) {
+  if (requireDescription && !payload.description) {
     errors.push("Beskrivelse er obligatorisk.");
   }
 

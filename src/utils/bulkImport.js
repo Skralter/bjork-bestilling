@@ -10,7 +10,7 @@ function parseBulkProductLines(rawText) {
   lines.forEach((line, index) => {
     const parts = line.split(";").map((part) => part.trim());
 
-    if (parts.length < 2) {
+    if (parts.length < 2 || !parts[0] || !parts[1]) {
       errors.push(`Linje ${index + 1}: Du må minst oppgi bryggeri og ølnavn.`);
       return;
     }
@@ -34,7 +34,7 @@ function parseBulkProductLines(rawText) {
       totalAvailableQuantity,
       orderStep,
       orderDeadline,
-      status
+      status: status || "ACTIVE"
     });
   });
 
