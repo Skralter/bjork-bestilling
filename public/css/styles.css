@@ -408,6 +408,28 @@ a:focus-visible {
   margin: 0;
 }
 
+.product-price-form {
+  display: grid;
+  gap: 0.5rem;
+  width: 180px;
+  margin: 0;
+}
+
+.product-price-presets {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.product-price-presets button {
+  flex: 1;
+  padding: 0.5rem 0.65rem;
+  white-space: nowrap;
+}
+
+.product-price-form .inline-feedback {
+  font-size: 0.8rem;
+}
+
 .order-detail-line {
   display: grid;
   gap: 0.45rem;

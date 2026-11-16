@@ -36,7 +36,6 @@
           <th>Navn</th>
           <th>Status</th>
           <th>Pris</th>
-          <th>Trinn</th>
           <th>Bestillinger</th>
           <th>Handlinger</th>
         </tr>
@@ -52,8 +51,30 @@
               <div class="muted"><%= product.breweryName || 'Uten bryggeri' %></div>
             </td>
             <td><span class="badge badge-<%= product.status.toLowerCase() %>"><%= product.status %></span></td>
-            <td><%= product.price ? formatCurrency(product.price) : 'Ikke satt' %></td>
-            <td><%= product.orderStep %></td>
+            <td>
+              <form class="product-price-form" method="post" action="/admin/products/<%= product.id %>/price" data-product-price-form>
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="product-price-presets">
+                  <% [200, 220].forEach(function(price) { %>
+                    <button class="btn-soft" type="button" data-price-preset="<%= price %>" aria-label="Sett pris til <%= price %> kr for <%= product.name %>"><%= price %> kr</button>
+                  <% }) %>
+                </div>
+                <input
+                  type="text"
+                  name="price"
+                  inputmode="decimal"
+                  pattern="(?:[0-9]+(?:[.,][0-9]{1,2})?|[.,][0-9]{1,2})"
+                  maxlength="11"
+                  autocomplete="off"
+                  placeholder="Pris i kr"
+                  aria-label="Pris i kr for <%= product.name %>"
+                  aria-describedby="price-feedback-<%= product.id %>"
+                  value="<%= product.price === null ? '' : product.price.toFixed(2).replace('.', ',') %>"
+                >
+                <p class="inline-feedback" id="price-feedback-<%= product.id %>" data-price-feedback role="status" aria-live="polite">Lagres automatisk</p>
+                <button class="btn-secondary" type="submit" data-price-retry hidden>Prøv igjen</button>
+              </form>
+            </td>
             <td><%= product._count.orders %></td>
             <td>
               <div class="button-row">

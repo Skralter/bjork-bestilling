@@ -8,7 +8,7 @@ const {
   toggleUserRole,
   buildProductOrdersCsv
 } = require("../services/adminService");
-const { validateProductInput } = require("../validators/productValidators");
+const { validateProductInput, validateProductPrice } = require("../validators/productValidators");
 const { getProductOverview } = require("../services/productService");
 const { formatCurrency, formatDate } = require("../utils/formatters");
 const { fetchBeerImageFromGoogle } = require("../services/beerImageService");
@@ -216,6 +216,31 @@ async function updateProduct(req, res, next) {
     req.flash("success", "Produktet ble oppdatert.");
     return res.redirect("/admin/products");
   } catch (error) {
+    return next(error);
+  }
+}
+
+async function updateProductPrice(req, res, next) {
+  const { error, price } = validateProductPrice(req.body);
+  if (error) {
+    return res.status(422).json({ success: false, message: error });
+  }
+
+  try {
+    const product = await prisma.product.update({
+      where: { id: req.params.productId },
+      data: { price },
+      select: { price: true }
+    });
+    return res.json({
+      success: true,
+      price: product.price === null ? null : product.price.toFixed(2),
+      message: product.price === null ? "Pris fjernet." : "Pris lagret."
+    });
+  } catch (error) {
+    if (error.code === "P2025") {
+      return res.status(404).json({ success: false, message: "Varen finnes ikke lenger." });
+    }
     return next(error);
   }
 }
@@ -474,6 +499,7 @@ module.exports = {
   createBulkProducts,
   showEditProduct,
   updateProduct,
+  updateProductPrice,
   changeProductStatus,
   deleteProduct,
   showProductOrders,

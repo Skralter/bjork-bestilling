@@ -17,6 +17,7 @@ router.post("/products", requireAdmin, adminController.createProduct);
 router.post("/products/bulk", requireAdmin, adminController.createBulkProducts);
 router.get("/products/:productId/edit", requireAdmin, adminController.showEditProduct);
 router.post("/products/:productId", requireAdmin, adminController.updateProduct);
+router.post("/products/:productId/price", requireAdmin, adminController.updateProductPrice);
 router.post("/products/:productId/status", requireAdmin, adminController.changeProductStatus);
 router.post("/products/:productId/delete", requireAdmin, adminController.deleteProduct);
 router.get("/products/:productId/orders", requireAdmin, adminController.showProductOrders);

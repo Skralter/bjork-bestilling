@@ -122,6 +122,127 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  document.querySelectorAll("[data-product-price-form]").forEach((form) => {
+    const input = form.querySelector("input[name='price']");
+    const feedback = form.querySelector("[data-price-feedback]");
+    const retryButton = form.querySelector("[data-price-retry]");
+    const csrfInput = form.querySelector("input[name='_csrf']");
+    let savedValue = input.value.trim().replace(",", ".");
+    let timer;
+    let saving = false;
+    let queued = false;
+    let revision = 0;
+    let needsRetry = false;
+
+    const showFeedback = (message, state = "") => {
+      feedback.textContent = message;
+      feedback.classList.toggle("is-error", state === "error");
+      feedback.classList.toggle("is-success", state === "success");
+      retryButton.hidden = state !== "error";
+    };
+
+    const savePrice = async () => {
+      clearTimeout(timer);
+      timer = undefined;
+      if (saving) {
+        queued = true;
+        return;
+      }
+
+      const rawValue = input.value.trim();
+      if (rawValue && !input.checkValidity()) {
+        input.setAttribute("aria-invalid", "true");
+        showFeedback("Skriv en pris med høyst to desimaler.", "error");
+        return;
+      }
+
+      const numericValue = Number(rawValue.replace(",", "."));
+      if (rawValue && (!Number.isFinite(numericValue) || numericValue < 0 || numericValue > 99999999.99)) {
+        input.setAttribute("aria-invalid", "true");
+        showFeedback("Pris må være mellom 0 og 99 999 999,99 kr.", "error");
+        return;
+      }
+
+      input.removeAttribute("aria-invalid");
+      const value = rawValue ? numericValue.toFixed(2) : "";
+      if (value === savedValue && !needsRetry) {
+        showFeedback(value ? "Pris lagret." : "Pris ikke satt.", "success");
+        return;
+      }
+
+      const submittedRevision = revision;
+      saving = true;
+      queued = false;
+      form.setAttribute("aria-busy", "true");
+      showFeedback("Lagrer...");
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+          },
+          body: new URLSearchParams({ _csrf: csrfInput.value, price: value }).toString(),
+          keepalive: true
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Kunne ikke lagre prisen. Prøv igjen.");
+        }
+
+        savedValue = data.price ?? "";
+        needsRetry = false;
+        if (revision === submittedRevision) {
+          input.value = savedValue.replace(".", ",");
+          showFeedback(data.message || "Pris lagret.", "success");
+        }
+      } catch (error) {
+        needsRetry = true;
+        if (revision === submittedRevision) {
+          showFeedback("Kunne ikke lagre. " + (error.message || "Prøv igjen."), "error");
+        }
+      } finally {
+        saving = false;
+        form.removeAttribute("aria-busy");
+        if (queued) {
+          queued = false;
+          savePrice();
+        }
+      }
+    };
+
+    input.addEventListener("input", () => {
+      revision += 1;
+      input.removeAttribute("aria-invalid");
+      clearTimeout(timer);
+      showFeedback("Venter på lagring...");
+      timer = setTimeout(savePrice, 600);
+    });
+    input.addEventListener("change", savePrice);
+    input.addEventListener("blur", savePrice);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      savePrice();
+    });
+    form.querySelectorAll("[data-price-preset]").forEach((button) => {
+      button.addEventListener("click", () => {
+        input.value = button.getAttribute("data-price-preset");
+        revision += 1;
+        savePrice();
+      });
+    });
+    window.addEventListener("beforeunload", (event) => {
+      const value = input.value.trim().replace(",", ".");
+      const normalizedValue = value && Number.isFinite(Number(value)) ? Number(value).toFixed(2) : value;
+      if (saving || needsRetry || normalizedValue !== savedValue) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    });
+  });
+
   const adminProductSearch = document.querySelector("[data-admin-product-search]");
   const adminProductRows = Array.from(document.querySelectorAll("[data-admin-product-row]"));
   const adminProductSearchFeedback = document.querySelector("[data-admin-product-search-feedback]");
